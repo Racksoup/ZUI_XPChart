@@ -1,0 +1,11 @@
+## Interface: 11402
+## Title: ZUI XP Chart
+## Author: ZUI
+## SavedVariables: ZUI_XPChartDB
+## OptionalDeps: Ace3
+## X-Embeds: Ace3
+
+embeds.xml
+
+enUS.lua
+core.lua
