@@ -60,9 +60,7 @@ function XPC:OnTimePlayedMsg(self, event, ...)
 end
 
 function XPC:CreateUI()
-    if (XPC_GUI.MainFrame) then
-        XPC_GUI.MainFrame:Release()
-    end
+    if (XPC_GUI.MainFrame) then XPC_GUI.MainFrame:Hide() XPC_GUI.MainFrame = {} end
     XPC_GUI.MainFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
     local frame = XPC_GUI.MainFrame
     frame:SetPoint("CENTER")
@@ -77,6 +75,7 @@ function XPC:CreateUI()
 end
 
 function XPC:BuildChartLayout()
+    -- find and save highest amount of time played on any character, highest level of any character
     local mostTimePlayed = 0
     local highestLevel = 0
     for i,v in pairs(XPC.db.realm) do
@@ -85,17 +84,92 @@ function XPC:BuildChartLayout()
             if (k[2] > highestLevel) then highestLevel = k[2] end
         end
     end
-    local lastTimePoint = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameTooltipText")
-    lastTimePoint:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
-    lastTimePoint:SetText(mostTimePlayed /60/60/24)
-    lastTimePoint:SetPoint("BOTTOMLEFT", 1200, 0)
 
-    local lastLevelPoint = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameTooltipText")
-    lastLevelPoint:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
-    lastLevelPoint:SetText(highestLevel)
-    lastLevelPoint:SetPoint("BOTTOMLEFT", 0, 650)
+    local frameWidth = 1150
+    local frameHeight = 600
+    local frameWidthInterval = frameWidth / mostTimePlayed 
+    local mostDaysPlayed = math.floor(XPC:StoD(mostTimePlayed))
+    print(mostDaysPlayed)
+    
+
+    XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidth, frameWidthInterval)
+    XPC:BuildYAxis()
+
+    local lastLevelPointText = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameTooltipText")
+    lastLevelPointText:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
+    lastLevelPointText:SetText(highestLevel)
+    lastLevelPointText:SetPoint("BOTTOMLEFT", 0, frameHeight)
+    
+
 
 end
 
+function XPC:StoD(val)
+    return val / 60 / 60 / 24
+end
+
+function XPC:DtoS(val)
+    return val * 60 * 60 * 24
+end
+
+function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidth, frameWidthInterval)
+    -- find spacing. we want to divide by 5 then 4 then 3 then 2 trying to find a mod% full remainder value
+    -- if mod == division
+    -- else go with divide by 4 and decimal points
+    if (mostDaysPlayed > 5) then
+        local numOfTextObjs = 0
+        local modNum = 0
+
+        -- mod mostDaysPlayed from 5 to 1.
+        for i=5, 0, -1 do      
+            modNum = mostDaysPlayed % i
+            -- if modNum is 0 break the loop and set numOfTextObjs to i 
+            if (modNum == 0) then
+                -- if we reach 1 numOfTextObjs should be 4
+                if (i == 1) then numOfTextObjs = 4 
+                else numOfTextObjs = i end
+                break
+            end 
+        end
+        
+        -- print x-axis text
+        for i=1, numOfTextObjs do 
+            local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
+            fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
+            fstring:SetText(mostDaysPlayed * (i / numOfTextObjs))
+            fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs), 0)
+        end
+    end
+end
+
+function XPC:BuildYAxis( )
+    -- find spacing. we want to divide by 5 then 4 then 3 then 2 trying to find a mod% full remainder value
+    -- if mod == division
+    -- else go with divide by 4 and decimal points
+    if (mostDaysPlayed > 5) then
+        local numOfTextObjs = 0
+        local modNum = 0
+
+        -- mod mostDaysPlayed from 5 to 1.
+        for i=5, 0, -1 do      
+            modNum = mostDaysPlayed % i
+            -- if modNum is 0 break the loop and set numOfTextObjs to i 
+            if (modNum == 0) then
+                -- if we reach 1 numOfTextObjs should be 4
+                if (i == 1) then numOfTextObjs = 4 
+                else numOfTextObjs = i end
+                break
+            end 
+        end
+        
+        -- print x-axis text
+        for i=1, numOfTextObjs do 
+            local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
+            fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
+            fstring:SetText(mostDaysPlayed * (i / numOfTextObjs))
+            fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs), 0)
+        end
+    end
+end
 
 --make display widget
