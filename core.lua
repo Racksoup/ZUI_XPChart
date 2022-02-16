@@ -20,6 +20,7 @@ local XPToLevelClassic = {
 
 function XPC:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("ZUI_XPChartDB", defaults, true)
+    -- self.db:ResetDB()
 
     -- only register if the player is less than lvl 60
     local currLvl = UnitLevel("player")
@@ -28,8 +29,12 @@ function XPC:OnInitialize()
         XPC_GUI.scripts = CreateFrame("Frame")
         XPC_GUI.scripts:RegisterEvent("TIME_PLAYED_MSG")
         XPC_GUI.scripts:SetScript("OnEvent", function(self, event, ...) XPC:OnTimePlayedMsg(self, event, ...) end)
-        -- requesttimeplayed when loging in
-        RequestTimePlayed()
+        -- requesttimeplayed every 30min, works on login too
+        function TimePlayedEvery30()
+            RequestTimePlayed() 
+            C_Timer.After(1800, function() TimePlayedEvery30() end)
+        end
+        TimePlayedEvery30()
     end
 end
 
@@ -38,8 +43,12 @@ function XPC:OnTimePlayedMsg(self, event, ...)
         local playerName = GetUnitName("player")
         local currXP = UnitXP("player")
         local currLvl = UnitLevel("player")
-        print(...)
-        --table.insert(XPC.db.realm[playerName], {})
+        local arg1, arg2 = ...
+        local timePlayed = arg1 /60 /60/ 24
+        if (XPC.db.realm[playerName] == nil) then
+            XPC.db.realm[playerName] = {}
+        end
+        table.insert(XPC.db.realm[playerName], {arg1, currLvl, currXP})
     end
 end
 
