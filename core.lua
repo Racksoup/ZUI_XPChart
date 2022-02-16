@@ -4,7 +4,27 @@ local XPC_GUI = LibStub("AceGUI-3.0")
 
 local defaults = {
     realm = {
-
+        data = {
+            SampleLevels = {
+                {345600, 35, 300, 340000},
+                {380000, 45, 200, 400000},
+                {420000, 45, 200, 480000},
+                {450000, 45, 200, 570000},
+                {470000, 45, 200, 710000},
+                {550000, 45, 200, 860000},
+                {570000, 45, 200, 1010000},
+                {600000, 45, 200, 1240000},
+                {1200000, 45, 200, 1440000},
+            },
+        },
+        XPToLevelClassic = {
+            400,    900,    1400,   2100,   2800,   3600,   4500,   5400,   6500,   7600, -- 1-10
+            8800,   10100,  11400,  12900,  14400,  16000,  17700,  19400,  21300,  23200, -- 11- 20
+            25200,  27300,  29400,  31700,  34000,  36400,  38900,  41400,  44300,  47400, -- 21-30
+            50800,  54500,  58600,  62800,  67100,  71600,  76100,  80800,  85700,  90700, -- 31-40
+            95800,  101000, 106300, 111800, 117500, 123200, 129100, 135100, 141200, 147500, -- 41-50
+            153900, 160400, 167100, 173900, 180800, 187900, 195000, 202300, 209800, 217400 -- 51-60
+        },
     }
 }
 
@@ -15,19 +35,9 @@ SlashCmdList["XPC"] = function()
     XPC_GUI.MainFrame:Show()
 end
 
--- all xp to level 1-60 Classic WoW
-XPToLevelClassic = {
-    400,    900,    1400,   2100,   2800,   3600,   4500,   5400,   6500,   7600, -- 1-10
-    8800,   10100,  11400,  12900,  14400,  16000,  17700,  19400,  21300,  23200, -- 11- 20
-    25200,  27300,  29400,  31700,  34000,  36400,  38900,  41400,  44300,  47400, -- 21-30
-    50800,  54500,  58600,  62800,  67100,  71600,  76100,  80800,  85700,  90700, -- 31-40
-    95800,  101000, 106300, 111800, 117500, 123200, 129100, 135100, 141200, 147500, -- 41-50
-    153900, 160400, 167100, 173900, 180800, 187900, 195000, 202300, 209800, 217400 -- 51-60
-}
-
 function XPC:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("ZUI_XPChartDB", defaults, true)
-    -- self.db:ResetDB()
+    --self.db:ResetDB()
 
     XPC.playerName = GetUnitName("player")
     -- only register if the player is less than lvl 60
@@ -51,11 +61,16 @@ function XPC:OnTimePlayedMsg(self, event, ...)
         local currXP = UnitXP("player")
         local currLvl = UnitLevel("player")
         local arg1, arg2 = ...
-        local timePlayed = arg1 /60 /60/ 24
-        if (XPC.db.realm[XPC.playerName] == nil) then
-            XPC.db.realm[XPC.playerName] = {}
+        local totalXP = 0
+        for i = 1, currLvl -1 do 
+            totalXP = totalXP + XPC.db.realm.XPToLevelClassic[i]
         end
-        table.insert(XPC.db.realm[XPC.playerName], {arg1, currLvl, currXP})
+
+        totalXP = totalXP + currXP
+        if (XPC.db.realm.data[XPC.playerName] == nil) then
+            XPC.db.realm.data[XPC.playerName] = {}
+        end
+        table.insert(XPC.db.realm.data[XPC.playerName], {arg1, currLvl, currXP, totalXP})
     end
 end
 
@@ -77,16 +92,17 @@ function XPC:BuildChartLayout()
     local XPOfHighestLevel = 0
     local totalXPOfHighest = 0
     -- find and save highest amount of time played on any character, highest level of any character
-    for i,v in pairs(XPC.db.realm) do
+    for i,v in pairs(XPC.db.realm.data) do
         for j, k in ipairs(v) do
             if (k[1] > mostTimePlayed) then mostTimePlayed = k[1] end
             if (k[2] > highestLevel) then highestLevel = k[2] XPOnLastLvl = k[3] end
         end
     end
 
+    print(highestLevel)
     -- save total amout of xp in highest lvl
     for i = 1, highestLevel do 
-        XPOfHighestLevel = XPOfHighestLevel + XPToLevelClassic[i]
+        XPOfHighestLevel = XPOfHighestLevel + XPC.db.realm.XPToLevelClassic[i]
     end
     
     -- save total amout of xp on highest xp character
@@ -99,17 +115,35 @@ function XPC:BuildChartLayout()
     local mostDaysPlayed = math.floor(XPC:StoD(mostTimePlayed))
     print(mostDaysPlayed)
     
-
     XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
     XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOHighest, XPOfHighestLevel, frameWidth)
+    XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
 end
 
-function XPC:StoD(val)
-    return val / 60 / 60 / 24
+function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
+    for i, v in pairs(XPC.db.realm.data) do
+        XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, {0,1,1,1})
+        print(i, "==", v)
+    end
 end
 
-function XPC:DtoS(val)
-    return val * 60 * 60 * 24
+function XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, DB, lineColor)
+    for i, v in ipairs(DB) do
+        local StartTime = v[1]
+        local StartXP = v[4]
+        if (i ~= #DB) then 
+            local EndTime = DB[i +1][1]
+            local EndXP = DB[i +1][4]
+            XPC:BuildALine(frameWidthInterval, frameHeightInterval, StartTime, StartXP, EndTime, EndXP, lineColor)
+        end
+    end
+end
+
+function XPC:BuildALine(frameWidthInterval, frameHeightInterval, StartTime, StartXP, EndTime, EndXP, LC)
+    local line = XPC_GUI.MainFrame:CreateLine()
+    line:SetColorTexture(LC[1], LC[2], LC[3], LC[4])
+    line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * StartTime, frameHeightInterval * StartXP )
+    line:SetEndPoint("BOTTOMLEFT", frameWidthInterval * EndTime, frameHeightInterval * EndXP )
 end
 
 function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
@@ -135,13 +169,14 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
         -- print x-axis text
         for i=1, numOfTextObjs do 
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
+            local offset = 8
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
             fstring:SetText(mostDaysPlayed * (i / numOfTextObjs))
-            fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs), 0)
+            fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) - offset, 4)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs), 0)
-            line:SetEndPoint("TOPLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs), 0)
+            line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) + offset, 0)
+            line:SetEndPoint("TOPLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) +offset, -20)
         end
     end
 end
@@ -150,6 +185,8 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
     -- find spacing. we want to divide by 5 then 4 then 3 then 2 trying to find a mod% full remainder value
     -- if mod == division
     -- else go with divide by 4 and decimal points
+
+    local offset = 5
     if (highestLevel < 60) then
         local numOfTextObjs = 0
         local modNum = 0
@@ -171,15 +208,25 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
             fstring:SetText(highestLevel * (i / numOfTextObjs))
-            fstring:SetPoint("BOTTOMLEFT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs))
+            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) -offset)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs))
-            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs))
+            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) +offset)
+            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) +offset)
         end
     end
 end
 
--- make sample data
--- for each data point in the line, make a line from connecting 2 points (1-2, 2-3, 3-4, 4-5)
---set data lines
+function XPC:StoD(val)
+    return val / 60 / 60 / 24
+end
+
+function XPC:DtoS(val)
+    return val * 60 * 60 * 24
+end
+
+-- add color selection
+-- remove line selection
+-- reset all data button
+-- make sure values are correct
+-- for tbc and wrath
