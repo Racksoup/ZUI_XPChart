@@ -8,6 +8,13 @@ local defaults = {
     }
 }
 
+SLASH_XPC1 = "/xpc"
+
+SlashCmdList["XPC"] = function()
+    XPC:CreateUI()
+    XPC_GUI.MainFrame:Show()
+end
+
 -- all xp to level 1-60 Classic WoW
 local XPToLevelClassic = {
     400,    900,    1400,   2100,   2800,   3600,   4500,   5400,   6500,   7600, -- 1-10
@@ -22,6 +29,7 @@ function XPC:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("ZUI_XPChartDB", defaults, true)
     -- self.db:ResetDB()
 
+    XPC.playerName = GetUnitName("player")
     -- only register if the player is less than lvl 60
     local currLvl = UnitLevel("player")
     if (currLvl < 60) then
@@ -40,20 +48,54 @@ end
 
 function XPC:OnTimePlayedMsg(self, event, ...)
     if (event == "TIME_PLAYED_MSG") then
-        local playerName = GetUnitName("player")
         local currXP = UnitXP("player")
         local currLvl = UnitLevel("player")
         local arg1, arg2 = ...
         local timePlayed = arg1 /60 /60/ 24
-        if (XPC.db.realm[playerName] == nil) then
-            XPC.db.realm[playerName] = {}
+        if (XPC.db.realm[XPC.playerName] == nil) then
+            XPC.db.realm[XPC.playerName] = {}
         end
-        table.insert(XPC.db.realm[playerName], {arg1, currLvl, currXP})
+        table.insert(XPC.db.realm[XPC.playerName], {arg1, currLvl, currXP})
     end
 end
 
---get time played on loggin and every 30min, if not lvl 60
+function XPC:CreateUI()
+    if (XPC_GUI.MainFrame) then
+        XPC_GUI.MainFrame:Release()
+    end
+    XPC_GUI.MainFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+    local frame = XPC_GUI.MainFrame
+    frame:SetPoint("CENTER")
+    frame:SetWidth(1200)
+    frame:SetHeight(650)
+    XPC:BuildChartLayout()
+    local line = frame:CreateLine()
+    line:SetColorTexture(0.7,0.7,0.7,.1)
+    line:SetStartPoint("TOPLEFT",10,10)
+    line:SetEndPoint("BOTTOMRIGHT",10,10)
+    XPC_GUI.MainFrame:Hide()
+end
 
---save time played and current xp to realm data under each characters own name
+function XPC:BuildChartLayout()
+    local mostTimePlayed = 0
+    local highestLevel = 0
+    for i,v in pairs(XPC.db.realm) do
+        for j, k in ipairs(v) do
+            if (k[1] > mostTimePlayed) then mostTimePlayed = k[1] end
+            if (k[2] > highestLevel) then highestLevel = k[2] end
+        end
+    end
+    local lastTimePoint = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameTooltipText")
+    lastTimePoint:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
+    lastTimePoint:SetText(mostTimePlayed /60/60/24)
+    lastTimePoint:SetPoint("BOTTOMLEFT", 1200, 0)
+
+    local lastLevelPoint = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameTooltipText")
+    lastLevelPoint:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
+    lastLevelPoint:SetText(highestLevel)
+    lastLevelPoint:SetPoint("BOTTOMLEFT", 0, 650)
+
+end
+
 
 --make display widget
