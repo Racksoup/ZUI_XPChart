@@ -180,5 +180,6 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
     end
 end
 
---print lines from each axis-textobj
+-- make sample data
+-- for each data point in the line, make a line from connecting 2 points (1-2, 2-3, 3-4, 4-5)
 --set data lines
