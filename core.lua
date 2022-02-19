@@ -99,7 +99,7 @@ function XPC:BuildChartLayout()
         end
     end
 
-    print(highestLevel)
+
     -- save total amout of xp in highest lvl
     for i = 1, highestLevel do 
         XPOfHighestLevel = XPOfHighestLevel + XPC.db.realm.XPToLevelClassic[i]
@@ -113,8 +113,7 @@ function XPC:BuildChartLayout()
     local frameWidthInterval = frameWidth / mostTimePlayed 
     local frameHeightInterval = frameHeight / totalXPOfHighest
     local mostDaysPlayed = math.floor(XPC:StoD(mostTimePlayed))
-    print(mostDaysPlayed)
-    
+
     XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
     XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOHighest, XPOfHighestLevel, frameWidth)
     XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
@@ -123,7 +122,7 @@ end
 function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
     for i, v in pairs(XPC.db.realm.data) do
         XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, {0,1,1,1})
-        print(i, "==", v)
+        
     end
 end
 
@@ -150,13 +149,17 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
     -- find spacing. we want to divide by 5 then 4 then 3 then 2 trying to find a mod% full remainder value
     -- if mod == division
     -- else go with divide by 4 and decimal points
-    if (mostDaysPlayed > 5) then
+    local mostDaysPlayed = mostDaysPlayed
+    print(mostDaysPlayed)
+    if (mostDaysPlayed < 5) then
+        mostDaysPlayed = XPC:StoD(mostTimePlayed)
+    end
         local numOfTextObjs = 0
         local modNum = 0
 
         -- mod mostDaysPlayed from 5 to 1.
         for i=5, 0, -1 do      
-            modNum = mostDaysPlayed % i
+            modNum = math.floor(mostDaysPlayed) % i
             -- if modNum is 0 break the loop and set numOfTextObjs to i 
             if (modNum == 0) then
                 -- if we reach 1 numOfTextObjs should be 4
@@ -165,20 +168,20 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
                 break
             end 
         end
-        
+
         -- print x-axis text
         for i=1, numOfTextObjs do 
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             local offset = 8
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
-            fstring:SetText(mostDaysPlayed * (i / numOfTextObjs))
+            fstring:SetText(math.floor(100 * mostDaysPlayed * (i / numOfTextObjs)) /100)
             fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) - offset, 4)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
             line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) + offset, 0)
             line:SetEndPoint("TOPLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) +offset, -20)
         end
-    end
+    
 end
 
 function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPOfHighestLevel, frameWidth)
