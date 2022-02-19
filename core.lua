@@ -4,10 +4,8 @@ local XPC_GUI = LibStub("AceGUI-3.0")
 
 local defaults = {
     realm = {
-        showGraphLine = {
-
-        },
-
+        showGraphLine = {},
+        playerLineColor = {},
         data = {
             SampleLevels = {
                 {345600, 35, 300, 340000},
@@ -43,6 +41,12 @@ function XPC:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("ZUI_XPChartDB", defaults, true)
     --self.db:ResetDB()
     XPC:SetShowGraphLine()
+
+    for i, v in pairs(XPC.db.realm.playerLineColor) do
+        for j, k in pairs(v) do
+            print(i, "==", j, "-", k)
+        end
+    end
 
     XPC.playerName = GetUnitName("player")
     -- only register if the player is less than lvl 60
@@ -140,6 +144,28 @@ function XPC:BuildChartLayout()
 end
 
 function  XPC:BuildSideFrameLayout()
+    local r,g,b,a = 1, 0, 0, 1;
+
+    local function myColorCallback(restore)
+        local newR, newG, newB, newA;
+        if restore then
+         -- The user bailed, we extract the old color from the table created by ShowColorPicker.
+         newR, newG, newB, newA = unpack(restore);
+        else
+         -- Something changed
+         newA, newR, newG, newB = OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB();
+        end
+        
+        -- Update our internal storage.
+        r, g, b, a = newR, newG, newB, newA;
+        -- And update any UI elements that use this color...
+        if (XPC.db.realm.playerLineColor[XPC.CurrColorCharacter] == nil) then XPC.db.realm.playerLineColor[XPC.CurrColorCharacter] = {} end
+        XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].r = r
+        XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].g = g
+        XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].b = b
+        XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].a = a
+    end
+
     if (XPC_GUI.MainFrame.SideFrame) then XPC_GUI.MainFrame.SideFrame:Hide() end
     XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
     XPC_GUI.MainFrame.SideFrame:SetPoint("CENTER", 200, 0);
@@ -160,7 +186,10 @@ function  XPC:BuildSideFrameLayout()
         button:SetWidth(100)
         button:SetHeight(20)
         button:SetText("Pick Color")
-        button:SetScript("OnClick", function()  ColorPickerFrame:Show() end)
+        button:SetScript("OnClick", function() 
+            XPC.CurrColorCharacter = i
+            XPC:ShowColorPicker(r,g,b,a, myColorCallback) 
+        end)
         lastbtn = button
 
         local buttonLabel = button:CreateFontString(nil, "OVERLAY", "GameToolTipText")
@@ -309,6 +338,16 @@ function XPC:DtoS(val)
 end
 
 
+
+function XPC:ShowColorPicker(r, g, b, a, changedCallback)
+    ColorPickerFrame.hasOpacity, ColorPickerFrame.opacity = (a ~= nil), a;
+    ColorPickerFrame.previousValues = {r,g,b,a};
+    ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = 
+     changedCallback, changedCallback, changedCallback;
+    ColorPickerFrame:SetColorRGB(r,g,b);
+    ColorPickerFrame:Hide(); -- Need to run the OnShow handler.
+    ColorPickerFrame:Show();
+end
 
 -- add color selection
 -- reset all data button
