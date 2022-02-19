@@ -109,9 +109,6 @@ function XPC:BuildChartLayout()
         end 
     end
 
-    print(highestLevel)
-
-
     -- save total amout of xp in highest lvl
     for i = 2, highestLevel do 
         XPOfHighestLevel = XPOfHighestLevel + XPC.db.realm.XPToLevelClassic[i - 1]
@@ -119,8 +116,6 @@ function XPC:BuildChartLayout()
     
     -- save total amout of xp on highest xp character
     totalXPOfHighest = XPOfHighestLevel + XPOnLastLvl
-
-    print(totalXPOfHighest)
 
     local frameWidth = 1150
     local frameHeight = 590
@@ -353,7 +348,6 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
                 break
             end 
         end
-        print(totalXPOfHighest)
         
         -- make y-axis text
         for i=1, numOfTextObjs do 
