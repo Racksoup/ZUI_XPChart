@@ -18,6 +18,29 @@ local defaults = {
                 {600000, 45, 200, 1240000},
                 {1200000, 45, 200, 1440000},
             },
+            OtherLevels = {
+                {245600, 35, 300, 210000},
+                {280000, 45, 200, 300000},
+                {320000, 45, 200, 380000},
+                {350000, 45, 200, 470000},
+                {470000, 45, 200, 610000},
+                {550000, 45, 200, 760000},
+                {570000, 45, 200, 810000},
+                {600000, 45, 200, 940000},
+                {700000, 45, 200, 1040000},
+            },
+            lessLevels = {
+                {100, 5, 300, 1000},
+                {2000, 5, 200, 50000},
+                {4000, 5, 200, 100000},
+                {8000, 5, 200, 150000},
+                {16000, 5, 200, 200000},
+                {32000, 5, 200, 250000},
+                {64000, 5, 200, 300000},
+                {128000, 5, 200, 350000},
+                {256000, 30, 200, 400000},
+                {512000, 30, 200, 450000},
+            },
         },
         XPToLevelClassic = {
             400,    900,    1400,   2100,   2800,   3600,   4500,   5400,   6500,   7600, -- 1-10
@@ -42,12 +65,6 @@ function XPC:OnInitialize()
     --self.db:ResetDB()
     XPC:SetShowGraphLine()
 
-    for i, v in pairs(XPC.db.realm.playerLineColor) do
-        for j, k in pairs(v) do
-            print(i, "==", j, "-", k)
-        end
-    end
-
     XPC.playerName = GetUnitName("player")
     -- only register if the player is less than lvl 60
     local currLvl = UnitLevel("player")
@@ -59,7 +76,7 @@ function XPC:OnInitialize()
         -- requesttimeplayed every 30min, works on login too
         function TimePlayedEvery30()
             RequestTimePlayed() 
-            C_Timer.After(1800, function() TimePlayedEvery30() end)
+            C_Timer.After(60, function() TimePlayedEvery30() end)
         end
         TimePlayedEvery30()
     end
@@ -123,7 +140,7 @@ function XPC:BuildChartLayout()
 
 
     -- save total amout of xp in highest lvl
-    for i = 1, highestLevel do 
+    for i = 2, highestLevel do 
         XPOfHighestLevel = XPOfHighestLevel + XPC.db.realm.XPToLevelClassic[i]
     end
     
@@ -145,6 +162,7 @@ end
 
 function  XPC:BuildSideFrameLayout()
     local r,g,b,a = 1, 0, 0, 1;
+    
 
     local function myColorCallback(restore)
         local newR, newG, newB, newA;
@@ -164,6 +182,7 @@ function  XPC:BuildSideFrameLayout()
         XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].g = g
         XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].b = b
         XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].a = a
+
     end
 
     if (XPC_GUI.MainFrame.SideFrame) then XPC_GUI.MainFrame.SideFrame:Hide() end
@@ -174,7 +193,20 @@ function  XPC:BuildSideFrameLayout()
     local lastbtn
     local firstLoop = true
     for i, v in pairs(XPC.db.realm.data) do
+        local color
         local button
+
+        if (XPC.db.realm.playerLineColor[i]) then
+            color = {
+                XPC.db.realm.playerLineColor[i].r, 
+                XPC.db.realm.playerLineColor[i].g, 
+                XPC.db.realm.playerLineColor[i].b, 
+                XPC.db.realm.playerLineColor[i].a
+            }
+        else
+            color = {0,0,1,1}
+        end
+
         if (firstLoop) then
             button = CreateFrame("Button", v, XPC_GUI.MainFrame.SideFrame, "UIPanelButtonTemplate")
             button:SetPoint("TOPRIGHT", -16 , -40)
@@ -188,7 +220,9 @@ function  XPC:BuildSideFrameLayout()
         button:SetText("Pick Color")
         button:SetScript("OnClick", function() 
             XPC.CurrColorCharacter = i
-            XPC:ShowColorPicker(r,g,b,a, myColorCallback) 
+           
+
+            XPC:ShowColorPicker(color[1], color[2], color[3], color[4], myColorCallback) 
         end)
         lastbtn = button
 
@@ -216,7 +250,13 @@ function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
         for j, k in pairs(XPC.db.realm.showGraphLine) do 
             if (i == j) then 
                 if(k[1] == true) then 
-                    XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, {0,1,1,1})
+                    local color
+                    if (XPC.db.realm.playerLineColor[i]) then
+                        color = {XPC.db.realm.playerLineColor[i].r, XPC.db.realm.playerLineColor[i].g, XPC.db.realm.playerLineColor[i].b, XPC.db.realm.playerLineColor[i].a}
+                    else
+                        color = {0,0,1,1}
+                    end
+                    XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, color)
                 end
             end
         end
@@ -238,8 +278,8 @@ end
 function XPC:BuildALine(frameWidthInterval, frameHeightInterval, StartTime, StartXP, EndTime, EndXP, LC)
     local line = XPC_GUI.MainFrame:CreateLine()
     line:SetColorTexture(LC[1], LC[2], LC[3], LC[4])
-    line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * StartTime, frameHeightInterval * StartXP )
-    line:SetEndPoint("BOTTOMLEFT", frameWidthInterval * EndTime, frameHeightInterval * EndXP )
+    line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * StartTime +10, frameHeightInterval * StartXP +10 )
+    line:SetEndPoint("BOTTOMLEFT", frameWidthInterval * EndTime+10, frameHeightInterval * EndXP +10 )
 end
 
 function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
@@ -265,7 +305,7 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
             end 
         end
 
-        -- print x-axis text
+        -- make x-axis text
         for i=1, numOfTextObjs do 
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             local offset = 8
@@ -302,7 +342,7 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
             end 
         end
         
-        -- print y-axis text
+        -- make y-axis text
         for i=1, numOfTextObjs do 
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
@@ -310,8 +350,8 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
             fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) -offset)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) +offset)
-            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) +offset)
+            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * XPOfHighestLevel * (i / numOfTextObjs) +offset)
+            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * XPOfHighestLevel * (i / numOfTextObjs) +offset)
         end
     end
 end
@@ -322,6 +362,7 @@ function XPC:SetShowGraphLine()
         for j, k in pairs(XPC.db.realm.showGraphLine) do
             if (i == j) then itemFound = true end
         end
+        print(itemFound)
         if (itemFound == false) then 
             XPC.db.realm.showGraphLine[i] = {}
             table.insert(XPC.db.realm.showGraphLine[i], true)
@@ -337,8 +378,6 @@ function XPC:DtoS(val)
     return val * 60 * 60 * 24
 end
 
-
-
 function XPC:ShowColorPicker(r, g, b, a, changedCallback)
     ColorPickerFrame.hasOpacity, ColorPickerFrame.opacity = (a ~= nil), a;
     ColorPickerFrame.previousValues = {r,g,b,a};
@@ -349,7 +388,8 @@ function XPC:ShowColorPicker(r, g, b, a, changedCallback)
     ColorPickerFrame:Show();
 end
 
--- add color selection
+-- color selector onclose change linecolor
 -- reset all data button
 -- make sure values are correct
+-- on level expansion bug
 -- for tbc and wrath
