@@ -4,6 +4,10 @@ local XPC_GUI = LibStub("AceGUI-3.0")
 
 local defaults = {
     realm = {
+        showGraphLine = {
+
+        },
+
         data = {
             SampleLevels = {
                 {345600, 35, 300, 340000},
@@ -38,6 +42,7 @@ end
 function XPC:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("ZUI_XPChartDB", defaults, true)
     --self.db:ResetDB()
+    XPC:SetShowGraphLine()
 
     XPC.playerName = GetUnitName("player")
     -- only register if the player is less than lvl 60
@@ -118,6 +123,8 @@ function  XPC:BuildSideFrameLayout()
         local checkbox = CreateFrame("CheckButton", nil, button, "ChatConfigCheckButtonTemplate")
         checkbox:SetPoint("LEFT", -25, 0)
         checkbox:SetSize(20, 20)
+        checkbox:SetChecked(XPC.db.realm.showGraphLine[i][1])
+        checkbox:SetScript("OnClick", function() XPC.db.realm.showGraphLine[i][1] = not XPC.db.realm.showGraphLine[i][1] end)
 
     end 
 
@@ -257,6 +264,19 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
     end
 end
 
+function XPC:SetShowGraphLine() 
+    for i, v in pairs (XPC.db.realm.data) do
+        local itemFound = false
+        for j, k in pairs(XPC.db.realm.showGraphLine) do
+            if (i == j) then itemFound = true end
+        end
+        if (itemFound == false) then 
+            XPC.db.realm.showGraphLine[i] = {}
+            table.insert(XPC.db.realm.showGraphLine[i], true)
+        end
+    end
+end
+
 function XPC:StoD(val)
     return val / 60 / 60 / 24
 end
@@ -264,6 +284,8 @@ end
 function XPC:DtoS(val)
     return val * 60 * 60 * 24
 end
+
+
 
 -- add color selection
 -- remove line selection
