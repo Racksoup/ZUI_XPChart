@@ -166,8 +166,13 @@ end
 
 function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
     for i, v in pairs(XPC.db.realm.data) do
-        XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, {0,1,1,1})
-        
+        for j, k in pairs(XPC.db.realm.showGraphLine) do 
+            if (i == j) then 
+                if(k[1] == true) then 
+                    XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, {0,1,1,1})
+                end
+            end
+        end
     end
 end
 
