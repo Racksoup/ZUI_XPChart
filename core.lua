@@ -138,10 +138,16 @@ function XPC:BuildChartLayout()
     local totalXPOfHighest = 0
     -- find and save highest amount of time played on any character, highest level of any character
     for i,v in pairs(XPC.db.realm.data) do
-        for j, k in ipairs(v) do
-            if (k[1] > mostTimePlayed) then mostTimePlayed = k[1] end
-            if (k[2] > highestLevel) then highestLevel = k[2] XPOnLastLvl = k[3] end
-        end
+        for l, d in pairs (XPC.db.realm.showGraphLine) do 
+            if (l == i) then 
+                if (d[1] == true) then
+                    for j, k in ipairs(v) do
+                        if (k[1] > mostTimePlayed) then mostTimePlayed = k[1] end
+                        if (k[2] > highestLevel) then highestLevel = k[2] XPOnLastLvl = k[3] end
+                    end
+                end
+            end
+        end 
     end
 
 
