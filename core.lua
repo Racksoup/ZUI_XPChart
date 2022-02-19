@@ -81,8 +81,21 @@ function XPC:CreateUI()
     frame:SetPoint("CENTER")
     frame:SetWidth(1200)
     frame:SetHeight(650)
+    XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
+    XPC_GUI.MainFrame.SideFrame:SetPoint("RIGHT", 200, 0);
+    XPC_GUI.MainFrame.SideFrame:SetWidth(200)
+    XPC_GUI.MainFrame.SideFrame:SetHeight(200) 
     XPC:BuildChartLayout()
+    XPC:BuildSideFrameLayout();
     XPC_GUI.MainFrame:Hide()
+end
+
+function  XPC:BuildSideFrameLayout()
+    local button = CreateFrame("Button", nil, XPC_GUI.MainFrame.SideFrame, "UIPanelButtonTemplate")
+    button:SetPoint("CENTER")
+    button:SetWidth(100)
+    button:SetHeight(20)
+    button:SetScript("OnClick", function()  ColorPickerFrame:Show() end)
 end
 
 function XPC:BuildChartLayout()
