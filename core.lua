@@ -259,7 +259,7 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
     local mostDaysPlayed = mostDaysPlayed
     if (mostDaysPlayed < 5) then
         mostDaysPlayed = XPC:StoD(mostTimePlayed)
-    end
+
         local numOfTextObjs = 0
         local modNum = 0
 
@@ -280,6 +280,34 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             local offset = 8
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
+            fstring:SetText(math.floor(100 * (mostDaysPlayed * 24) * (i / numOfTextObjs)) /100)
+            fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) - offset, 4)
+            local line = XPC_GUI.MainFrame:CreateLine()
+            line:SetColorTexture(0.7,0.7,0.7,.1)
+            line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) + offset, 0)
+            line:SetEndPoint("TOPLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) +offset, -20)
+        end
+    else
+        local numOfTextObjs = 0
+        local modNum = 0
+        
+        -- mod mostDaysPlayed from 5 to 1.
+        for i=5, 0, -1 do      
+            modNum = math.floor(mostDaysPlayed) % i
+            -- if modNum is 0 break the loop and set numOfTextObjs to i 
+            if (modNum == 0) then
+                -- if we reach 1 numOfTextObjs should be 4
+                if (i == 1) then numOfTextObjs = 4 
+                else numOfTextObjs = i end
+                break
+            end 
+        end
+        
+        -- make x-axis text
+        for i=1, numOfTextObjs do 
+            local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
+            local offset = 8
+            fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
             fstring:SetText(math.floor(100 * mostDaysPlayed * (i / numOfTextObjs)) /100)
             fstring:SetPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) - offset, 4)
             local line = XPC_GUI.MainFrame:CreateLine()
@@ -287,6 +315,7 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
             line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) + offset, 0)
             line:SetEndPoint("TOPLEFT", frameWidthInterval * XPC:DtoS(mostDaysPlayed) * (i / numOfTextObjs) +offset, -20)
         end
+    end
     
 end
 
@@ -357,7 +386,9 @@ function XPC:ShowColorPicker(r, g, b, a, changedCallback)
     ColorPickerFrame:Show();
 end
 
--- show hours on y-axis under 5days played
+-- show hours on x-axis under 5days played
 -- reset all data button
 -- on level expansion bug
 -- for tbc and wrath
+
+-- change how often timeout is called
