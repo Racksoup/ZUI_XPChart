@@ -104,18 +104,20 @@ function XPC:CreateUI()
     XPC:BuildChartLayout()
     XPC:BuildSideFrameLayout();
     XPC_GUI.MainFrame:Hide()
+    XPC_GUI.MainFrame.SideFrame:Hide()
 end
 
 function XPC:BuildChartLayout()
     if (XPC_GUI.MainFrame) then XPC_GUI.MainFrame:Hide() XPC_GUI.MainFrame = {} end
     XPC_GUI.MainFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
     local frame = XPC_GUI.MainFrame
+    frame:SetFrameStrata("HIGH")
     frame:SetPoint("CENTER")
     frame:SetWidth(1200)
     frame:SetHeight(650)
     local button = CreateFrame("Button", nil, XPC_GUI.MainFrame, "UIPanelButtonTemplate")
-    button:SetSize(150, 20)
-    button:SetPoint("TOP", 200, -20)
+    button:SetSize(150, 16)
+    button:SetPoint("TOPRIGHT", -100, -3)
     button:SetText("Options")
     button:SetScript("OnClick", function() XPC:BuildSideFrameLayout() end)
 
@@ -141,14 +143,14 @@ function XPC:BuildChartLayout()
 
     -- save total amout of xp in highest lvl
     for i = 2, highestLevel do 
-        XPOfHighestLevel = XPOfHighestLevel + XPC.db.realm.XPToLevelClassic[i]
+        XPOfHighestLevel = XPOfHighestLevel + XPC.db.realm.XPToLevelClassic[i - 1]
     end
     
     -- save total amout of xp on highest xp character
     totalXPOfHighest = XPOfHighestLevel + XPOnLastLvl
 
     local frameWidth = 1150
-    local frameHeight = 600
+    local frameHeight = 590
     local frameWidthInterval = frameWidth / mostTimePlayed 
     local frameHeightInterval = frameHeight / totalXPOfHighest
     local mostDaysPlayed = math.floor(XPC:StoD(mostTimePlayed))
@@ -182,7 +184,9 @@ function  XPC:BuildSideFrameLayout()
         XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].g = g
         XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].b = b
         XPC.db.realm.playerLineColor[XPC.CurrColorCharacter].a = a
-
+        XPC:CreateUI()
+        XPC_GUI.MainFrame:Show()
+        XPC_GUI.MainFrame.SideFrame:Show()
     end
 
     if (XPC_GUI.MainFrame.SideFrame) then XPC_GUI.MainFrame.SideFrame:Hide() end
@@ -240,6 +244,7 @@ function  XPC:BuildSideFrameLayout()
             XPC.db.realm.showGraphLine[i][1] = not XPC.db.realm.showGraphLine[i][1] 
             XPC:CreateUI()
             XPC_GUI.MainFrame:Show();
+            XPC_GUI.MainFrame.SideFrame:Show()
         end)
     end 
     XPC_GUI.MainFrame.SideFrame:Show();
@@ -362,7 +367,6 @@ function XPC:SetShowGraphLine()
         for j, k in pairs(XPC.db.realm.showGraphLine) do
             if (i == j) then itemFound = true end
         end
-        print(itemFound)
         if (itemFound == false) then 
             XPC.db.realm.showGraphLine[i] = {}
             table.insert(XPC.db.realm.showGraphLine[i], true)
@@ -388,8 +392,7 @@ function XPC:ShowColorPicker(r, g, b, a, changedCallback)
     ColorPickerFrame:Show();
 end
 
--- color selector onclose change linecolor
+-- show hours on y-axis under 5days played
 -- reset all data button
--- make sure values are correct
 -- on level expansion bug
 -- for tbc and wrath
