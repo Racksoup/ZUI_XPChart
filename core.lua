@@ -82,20 +82,45 @@ function XPC:CreateUI()
     frame:SetWidth(1200)
     frame:SetHeight(650)
     XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
-    XPC_GUI.MainFrame.SideFrame:SetPoint("RIGHT", 200, 0);
-    XPC_GUI.MainFrame.SideFrame:SetWidth(200)
-    XPC_GUI.MainFrame.SideFrame:SetHeight(200) 
+    XPC_GUI.MainFrame.SideFrame:SetPoint("CENTER", 200, 0);
+    XPC_GUI.MainFrame.SideFrame:SetWidth(330)
+    XPC_GUI.MainFrame.SideFrame:SetHeight(400) 
     XPC:BuildChartLayout()
     XPC:BuildSideFrameLayout();
     XPC_GUI.MainFrame:Hide()
 end
 
 function  XPC:BuildSideFrameLayout()
-    local button = CreateFrame("Button", nil, XPC_GUI.MainFrame.SideFrame, "UIPanelButtonTemplate")
-    button:SetPoint("CENTER")
-    button:SetWidth(100)
-    button:SetHeight(20)
-    button:SetScript("OnClick", function()  ColorPickerFrame:Show() end)
+    local lastbtn
+    local firstLoop = true
+    for i, v in pairs(XPC.db.realm.data) do
+        local button
+        if (firstLoop) then
+            button = CreateFrame("Button", v, XPC_GUI.MainFrame.SideFrame, "UIPanelButtonTemplate")
+            button:SetPoint("TOPRIGHT", -16 , -40)
+            firstLoop = false;
+        else
+            button = CreateFrame("Button", v, lastbtn, "UIPanelButtonTemplate")
+            button:SetPoint("TOP", 0, -30)
+        end
+        button:SetWidth(100)
+        button:SetHeight(20)
+        button:SetText("Pick Color")
+        button:SetScript("OnClick", function()  ColorPickerFrame:Show() end)
+        lastbtn = button
+
+        local buttonLabel = button:CreateFontString(nil, "OVERLAY", "GameToolTipText")
+        buttonLabel:SetFont("Fonts\\FRIZQT__.TTF", 12, "THINOUTLINE")
+        buttonLabel:SetPoint("LEFT", -200, 0)
+        local fString = string.format("%s - Show Line:", i)
+        buttonLabel:SetText(fString)
+
+        local checkbox = CreateFrame("CheckButton", nil, button, "ChatConfigCheckButtonTemplate")
+        checkbox:SetPoint("LEFT", -25, 0)
+        checkbox:SetSize(20, 20)
+
+    end 
+
 end
 
 function XPC:BuildChartLayout()
@@ -163,7 +188,6 @@ function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, fram
     -- if mod == division
     -- else go with divide by 4 and decimal points
     local mostDaysPlayed = mostDaysPlayed
-    print(mostDaysPlayed)
     if (mostDaysPlayed < 5) then
         mostDaysPlayed = XPC:StoD(mostTimePlayed)
     end
