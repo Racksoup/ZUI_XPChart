@@ -98,12 +98,17 @@ function XPC:BuildChartLayout()
                 if (d[1] == true) then
                     for j, k in ipairs(v) do
                         if (k[1] > mostTimePlayed) then mostTimePlayed = k[1] end
-                        if (k[2] > highestLevel) then highestLevel = k[2] XPOnLastLvl = k[3] end
+                        if (k[2] > highestLevel) then highestLevel = k[2] XPOnLastLvl = 0 end
+                        if (k[2] == highestLevel) then 
+                            if (k[3] > XPOnLastLvl) then XPOnLastLvl = k[3]  end
+                        end
                     end
                 end
             end
         end 
     end
+
+    print(highestLevel)
 
 
     -- save total amout of xp in highest lvl
@@ -121,7 +126,7 @@ function XPC:BuildChartLayout()
     local mostDaysPlayed = math.floor(XPC:StoD(mostTimePlayed))
 
     XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
-    XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOHighest, XPOfHighestLevel, frameWidth)
+    XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPOfHighestLevel, frameWidth)
     XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
     
     XPC_GUI.MainFrame:Show()
@@ -340,17 +345,18 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
                 break
             end 
         end
+        print(totalXPOfHighest)
         
         -- make y-axis text
         for i=1, numOfTextObjs do 
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
             fstring:SetText(highestLevel * (i / numOfTextObjs))
-            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * XPOfHighestLevel* (i / numOfTextObjs) -offset)
+            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * totalXPOfHighest* (i / numOfTextObjs) -offset)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * XPOfHighestLevel * (i / numOfTextObjs) +offset)
-            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * XPOfHighestLevel * (i / numOfTextObjs) +offset)
+            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * totalXPOfHighest * (i / numOfTextObjs) +offset)
+            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * totalXPOfHighest * (i / numOfTextObjs) +offset)
         end
     end
 end
@@ -386,9 +392,13 @@ function XPC:ShowColorPicker(r, g, b, a, changedCallback)
     ColorPickerFrame:Show();
 end
 
--- show hours on x-axis under 5days played
+
+-- Y-axis items not placed properly
+-- on open xpc call timeplayed
+
+-- mode: y-axis exponential rather than linear
 -- reset all data button
--- on level expansion bug
+-- on level expansion bug level 1-2
 -- for tbc and wrath
 
 -- change how often timeout is called
