@@ -85,49 +85,6 @@ function XPC:CreateUI()
     XPC_GUI.MainFrame:Hide()
 end
 
-function  XPC:BuildSideFrameLayout()
-    if (XPC_GUI.MainFrame.SideFrame) then XPC_GUI.MainFrame.SideFrame:Hide() end
-    XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
-    XPC_GUI.MainFrame.SideFrame:SetPoint("CENTER", 200, 0);
-    XPC_GUI.MainFrame.SideFrame:SetWidth(330)
-    XPC_GUI.MainFrame.SideFrame:SetHeight(400) 
-    local lastbtn
-    local firstLoop = true
-    for i, v in pairs(XPC.db.realm.data) do
-        local button
-        if (firstLoop) then
-            button = CreateFrame("Button", v, XPC_GUI.MainFrame.SideFrame, "UIPanelButtonTemplate")
-            button:SetPoint("TOPRIGHT", -16 , -40)
-            firstLoop = false;
-        else
-            button = CreateFrame("Button", v, lastbtn, "UIPanelButtonTemplate")
-            button:SetPoint("TOP", 0, -30)
-        end
-        button:SetWidth(100)
-        button:SetHeight(20)
-        button:SetText("Pick Color")
-        button:SetScript("OnClick", function()  ColorPickerFrame:Show() end)
-        lastbtn = button
-
-        local buttonLabel = button:CreateFontString(nil, "OVERLAY", "GameToolTipText")
-        buttonLabel:SetFont("Fonts\\FRIZQT__.TTF", 12, "THINOUTLINE")
-        buttonLabel:SetPoint("LEFT", -200, 0)
-        local fString = string.format("%s - Show Line:", i)
-        buttonLabel:SetText(fString)
-
-        local checkbox = CreateFrame("CheckButton", nil, button, "ChatConfigCheckButtonTemplate")
-        checkbox:SetPoint("LEFT", -25, 0)
-        checkbox:SetSize(20, 20)
-        checkbox:SetChecked(XPC.db.realm.showGraphLine[i][1])
-        checkbox:SetScript("OnClick", function() 
-            XPC.db.realm.showGraphLine[i][1] = not XPC.db.realm.showGraphLine[i][1] 
-            XPC:CreateUI()
-            XPC_GUI.MainFrame:Show();
-        end)
-    end 
-    XPC_GUI.MainFrame.SideFrame:Show();
-end
-
 function XPC:BuildChartLayout()
     if (XPC_GUI.MainFrame) then XPC_GUI.MainFrame:Hide() XPC_GUI.MainFrame = {} end
     XPC_GUI.MainFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
@@ -180,6 +137,49 @@ function XPC:BuildChartLayout()
     XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
     
     XPC_GUI.MainFrame:Show()
+end
+
+function  XPC:BuildSideFrameLayout()
+    if (XPC_GUI.MainFrame.SideFrame) then XPC_GUI.MainFrame.SideFrame:Hide() end
+    XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
+    XPC_GUI.MainFrame.SideFrame:SetPoint("CENTER", 200, 0);
+    XPC_GUI.MainFrame.SideFrame:SetWidth(300)
+    XPC_GUI.MainFrame.SideFrame:SetHeight(400) 
+    local lastbtn
+    local firstLoop = true
+    for i, v in pairs(XPC.db.realm.data) do
+        local button
+        if (firstLoop) then
+            button = CreateFrame("Button", v, XPC_GUI.MainFrame.SideFrame, "UIPanelButtonTemplate")
+            button:SetPoint("TOPRIGHT", -16 , -40)
+            firstLoop = false;
+        else
+            button = CreateFrame("Button", v, lastbtn, "UIPanelButtonTemplate")
+            button:SetPoint("TOP", 0, -30)
+        end
+        button:SetWidth(100)
+        button:SetHeight(20)
+        button:SetText("Pick Color")
+        button:SetScript("OnClick", function()  ColorPickerFrame:Show() end)
+        lastbtn = button
+
+        local buttonLabel = button:CreateFontString(nil, "OVERLAY", "GameToolTipText")
+        buttonLabel:SetFont("Fonts\\FRIZQT__.TTF", 12, "THINOUTLINE")
+        buttonLabel:SetPoint("LEFT", -140, 0)
+        local fString = string.format("Show - %s", i)
+        buttonLabel:SetText(fString)
+
+        local checkbox = CreateFrame("CheckButton", nil, button, "ChatConfigCheckButtonTemplate")
+        checkbox:SetPoint("LEFT", -165, 0)
+        checkbox:SetSize(20, 20)
+        checkbox:SetChecked(XPC.db.realm.showGraphLine[i][1])
+        checkbox:SetScript("OnClick", function() 
+            XPC.db.realm.showGraphLine[i][1] = not XPC.db.realm.showGraphLine[i][1] 
+            XPC:CreateUI()
+            XPC_GUI.MainFrame:Show();
+        end)
+    end 
+    XPC_GUI.MainFrame.SideFrame:Show();
 end
 
 function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
