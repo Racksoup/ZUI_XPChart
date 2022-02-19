@@ -80,22 +80,17 @@ function XPC:OnTimePlayedMsg(self, event, ...)
 end
 
 function XPC:CreateUI()
-    if (XPC_GUI.MainFrame) then XPC_GUI.MainFrame:Hide() XPC_GUI.MainFrame = {} end
-    XPC_GUI.MainFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
-    local frame = XPC_GUI.MainFrame
-    frame:SetPoint("CENTER")
-    frame:SetWidth(1200)
-    frame:SetHeight(650)
-    XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
-    XPC_GUI.MainFrame.SideFrame:SetPoint("CENTER", 200, 0);
-    XPC_GUI.MainFrame.SideFrame:SetWidth(330)
-    XPC_GUI.MainFrame.SideFrame:SetHeight(400) 
     XPC:BuildChartLayout()
     XPC:BuildSideFrameLayout();
     XPC_GUI.MainFrame:Hide()
 end
 
 function  XPC:BuildSideFrameLayout()
+    if (XPC_GUI.MainFrame.SideFrame) then XPC_GUI.MainFrame.SideFrame:Hide() end
+    XPC_GUI.MainFrame.SideFrame = CreateFrame("Frame", nil, XPC_GUI.MainFrame, "BasicFrameTemplateWithInset")
+    XPC_GUI.MainFrame.SideFrame:SetPoint("CENTER", 200, 0);
+    XPC_GUI.MainFrame.SideFrame:SetWidth(330)
+    XPC_GUI.MainFrame.SideFrame:SetHeight(400) 
     local lastbtn
     local firstLoop = true
     for i, v in pairs(XPC.db.realm.data) do
@@ -124,13 +119,28 @@ function  XPC:BuildSideFrameLayout()
         checkbox:SetPoint("LEFT", -25, 0)
         checkbox:SetSize(20, 20)
         checkbox:SetChecked(XPC.db.realm.showGraphLine[i][1])
-        checkbox:SetScript("OnClick", function() XPC.db.realm.showGraphLine[i][1] = not XPC.db.realm.showGraphLine[i][1] end)
-
+        checkbox:SetScript("OnClick", function() 
+            XPC.db.realm.showGraphLine[i][1] = not XPC.db.realm.showGraphLine[i][1] 
+            XPC:CreateUI()
+            XPC_GUI.MainFrame:Show();
+        end)
     end 
-
+    XPC_GUI.MainFrame.SideFrame:Show();
 end
 
 function XPC:BuildChartLayout()
+    if (XPC_GUI.MainFrame) then XPC_GUI.MainFrame:Hide() XPC_GUI.MainFrame = {} end
+    XPC_GUI.MainFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+    local frame = XPC_GUI.MainFrame
+    frame:SetPoint("CENTER")
+    frame:SetWidth(1200)
+    frame:SetHeight(650)
+    local button = CreateFrame("Button", nil, XPC_GUI.MainFrame, "UIPanelButtonTemplate")
+    button:SetSize(150, 20)
+    button:SetPoint("TOP", 200, -20)
+    button:SetText("Options")
+    button:SetScript("OnClick", function() XPC:BuildSideFrameLayout() end)
+
     local mostTimePlayed = 0
     local highestLevel = 0
     local XPOnLastLvl = 0
@@ -168,6 +178,8 @@ function XPC:BuildChartLayout()
     XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
     XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOHighest, XPOfHighestLevel, frameWidth)
     XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
+    
+    XPC_GUI.MainFrame:Show()
 end
 
 function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
@@ -299,7 +311,6 @@ end
 
 
 -- add color selection
--- remove line selection
 -- reset all data button
 -- make sure values are correct
 -- for tbc and wrath
