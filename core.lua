@@ -230,6 +230,7 @@ function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
                         color = {0,0,1,1}
                     end
                     XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, color)
+                    print(v[#v][4])
                 end
             end
         end
@@ -349,23 +350,24 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
             end 
         end
         
+        
+        print(totalXPOfHighest)
         -- make y-axis text
         for i=1, numOfTextObjs do 
+            local totalXPOfGraphIndex = 0
+            for x = 1, ((highestLevel - 1) * (i  / numOfTextObjs)) do 
+                totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[x]
+            end
+            print (totalXPOfGraphIndex)
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
             fstring:SetText(highestLevel * (i / numOfTextObjs))
-            local point = 0
 
-
-            for x = 1, (i-1) do 
-                point = point + XPC.db.realm.XPToLevelClassic[highestLevel * (x / numOfTextObjs)]
-            end
-
-            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * point* (i / numOfTextObjs) -alignLines + offset)
+            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * totalXPOfGraphIndex* (i / numOfTextObjs) -alignLines + offset)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * point * (i / numOfTextObjs) +alignLines + offset)
-            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * point * (i / numOfTextObjs) +alignLines + offset)
+            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * totalXPOfGraphIndex * (i / numOfTextObjs) +alignLines + offset)
+            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * totalXPOfGraphIndex * (i / numOfTextObjs) +alignLines + offset)
         end
     end
 end
