@@ -21,6 +21,7 @@ local defaults = {
 SLASH_XPC1 = "/xpc"
 
 SlashCmdList["XPC"] = function()
+    RequestTimePlayed()
     XPC:CreateUI()
     XPC_GUI.MainFrame:Show()
 end
@@ -66,7 +67,7 @@ function XPC:OnTimePlayedMsg(self, event, ...)
 end
 
 function XPC:CreateUI()
-    RequestTimePlayed()
+    
     XPC:BuildChartLayout()
     XPC:BuildSideFrameLayout();
     XPC_GUI.MainFrame:Hide()
@@ -343,7 +344,7 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
             -- if modNum is 0 break the loop and set numOfTextObjs to i 
             if (modNum == 0) then
                 -- if we reach 1 numOfTextObjs should be 4
-                if (i == 2) then numOfTextObjs = 4 
+                if (i <= 4) then numOfTextObjs = 8 
                 else numOfTextObjs = i end
                 break
             end 
@@ -351,7 +352,14 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
         
         
         -- make y-axis text
-        for i=1, numOfTextObjs do 
+        local x 
+        if (highestLevel < 5) then
+            x = 1
+        else 
+            x = 3
+        end
+
+        for i = x, numOfTextObjs do 
             local totalXPOfGraphIndex = 0
             for x = 1, ((highestLevel - 1) * (i  / numOfTextObjs)) do 
                 totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[x]
