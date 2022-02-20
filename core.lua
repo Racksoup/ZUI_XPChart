@@ -230,7 +230,6 @@ function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
                         color = {0,0,1,1}
                     end
                     XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, color)
-                    print(v[#v][4])
                 end
             end
         end
@@ -351,14 +350,12 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
         end
         
         
-        print(totalXPOfHighest)
         -- make y-axis text
         for i=1, numOfTextObjs do 
             local totalXPOfGraphIndex = 0
             for x = 1, ((highestLevel - 1) * (i  / numOfTextObjs)) do 
                 totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[x]
             end
-            print (totalXPOfGraphIndex)
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
             fstring:SetText(highestLevel * (i / numOfTextObjs))
