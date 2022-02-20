@@ -355,8 +355,10 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
         local x 
         if (highestLevel < 5) then
             x = 1
-        else 
+        elseif (highestLevel < 10) then
             x = 3
+        else
+            x = 4
         end
 
         for i = x, numOfTextObjs do 
