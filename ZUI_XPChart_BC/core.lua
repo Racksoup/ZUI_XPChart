@@ -13,7 +13,8 @@ local defaults = {
             25200,  27300,  29400,  31700,  34000,  36400,  38900,  41400,  44300,  47400, -- 21-30
             50800,  54500,  58600,  62800,  67100,  71600,  76100,  80800,  85700,  90700, -- 31-40
             95800,  101000, 106300, 111800, 117500, 123200, 129100, 135100, 141200, 147500, -- 41-50
-            153900, 160400, 167100, 173900, 180800, 187900, 195000, 202300, 209800, 217400 -- 51-60
+            153900, 160400, 167100, 173900, 180800, 187900, 195000, 202300, 209800, 494000, -- 51-60
+            574700, 614400, 650300, 682300, 710200, 734100, 753700, 768900, 779700, -- 61-70
         },
     }
 }
@@ -34,7 +35,7 @@ function XPC:OnInitialize()
     XPC.playerName = GetUnitName("player")
     -- only register if the player is less than lvl 60
     local currLvl = UnitLevel("player")
-    if (currLvl < 60) then
+    if (currLvl < 70) then
         -- register timeplayedmsg and a script for its event
         XPC_GUI.scripts = CreateFrame("Frame")
         XPC_GUI.scripts:RegisterEvent("TIME_PLAYED_MSG")
@@ -67,7 +68,6 @@ function XPC:OnTimePlayedMsg(self, event, ...)
 end
 
 function XPC:CreateUI()
-    
     XPC:BuildChartLayout()
     XPC:BuildSideFrameLayout();
     XPC_GUI.MainFrame:Hide()
