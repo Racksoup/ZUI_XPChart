@@ -332,7 +332,7 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
     -- else go with divide by 4 and decimal points
 
     local alignLines = 5
-    local offset = 10
+    local offset = 6
 
     if (highestLevel < 60) then
         local numOfTextObjs = 0
@@ -363,18 +363,19 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
 
         for i = x, numOfTextObjs do 
             local totalXPOfGraphIndex = 0
-            for x = 1, ((highestLevel - 1) * (i  / numOfTextObjs)) do 
-                totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[x]
+            local lineLevelPercentage = (i / numOfTextObjs)
+            for j = 2, (highestLevel * lineLevelPercentage) do 
+                totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[j - 1]
             end
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
-            fstring:SetText(highestLevel * (i / numOfTextObjs))
+            fstring:SetText(highestLevel * lineLevelPercentage)
 
-            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * totalXPOfGraphIndex* (i / numOfTextObjs) -alignLines + offset)
+            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * totalXPOfGraphIndex -alignLines + offset)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * totalXPOfGraphIndex * (i / numOfTextObjs) +alignLines + offset)
-            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * totalXPOfGraphIndex * (i / numOfTextObjs) +alignLines + offset)
+            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * totalXPOfGraphIndex +alignLines + offset)
+            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * totalXPOfGraphIndex +alignLines + offset)
         end
     end
 end
