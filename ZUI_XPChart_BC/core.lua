@@ -43,7 +43,7 @@ function XPC:OnInitialize()
         -- requesttimeplayed every 30min, works on login too
         function TimePlayedEvery30()
             RequestTimePlayed() 
-            C_Timer.After(150, function() TimePlayedEvery30() end)
+            C_Timer.After(900, function() TimePlayedEvery30() end)
         end
         C_Timer.After(150, function() TimePlayedEvery30() end)
     end
