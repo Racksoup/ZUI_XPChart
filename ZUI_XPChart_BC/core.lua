@@ -8,13 +8,13 @@ local defaults = {
         playerLineColor = {},
         data = {},
         XPToLevelClassic = {
-            400,    900,    1400,   2100,   2800,   3600,   4500,   5400,   6500,   7600, -- 1-10
-            8800,   10100,  11400,  12900,  14400,  16000,  17700,  19400,  21300,  23200, -- 11- 20
-            25200,  27300,  29400,  31700,  34000,  36400,  38900,  41400,  44300,  47400, -- 21-30
-            50800,  54500,  58600,  62800,  67100,  71600,  76100,  80800,  85700,  90700, -- 31-40
-            95800,  101000, 106300, 111800, 117500, 123200, 129100, 135100, 141200, 147500, -- 41-50
-            153900, 160400, 167100, 173900, 180800, 187900, 195000, 202300, 209800, 494000, -- 51-60
-            574700, 614400, 650300, 682300, 710200, 734100, 753700, 768900, 779700, -- 61-70
+            400,    900,    1400,   2100,   2800,   3600,   4500,   5400,   6500,   7600,   -- 1-10
+            8700,   9800,   11000,  12300,  13600,  15000,  16400,  17800,  19300,  20800,  -- 11- 20
+            22400,  24000,  25500,  27200,  28900,  30500,  32200,  33900,  36300,  38800,  -- 21-30
+            41600,  44600,  48000,  51400,  55000,  58700,  62400,  66200,  70200,  74300,  -- 31-40
+            78500,  82800,  87100,  91600,  96300,  101000, 105800, 110700, 115700, 120900, -- 41-50
+            126100, 131500, 137000, 142500, 148200, 154000, 159900, 165800, 172000, 494000, -- 51-60
+            574700, 614400, 650300, 682300, 710200, 734100, 753700, 768900, 779700,         -- 61-69
         },
     }
 }
@@ -256,6 +256,7 @@ function XPC:BuildALine(frameWidthInterval, frameHeightInterval, StartTime, Star
     line:SetColorTexture(LC[1], LC[2], LC[3], LC[4])
     line:SetStartPoint("BOTTOMLEFT", frameWidthInterval * StartTime + offset, frameHeightInterval * StartXP + offset )
     line:SetEndPoint("BOTTOMLEFT", frameWidthInterval * EndTime + offset, frameHeightInterval * EndXP + offset )
+    
 end
 
 function XPC:BuildXAxis(mostTimePlayed, mostDaysPlayed, frameWidthInterval, frameHeight)
@@ -332,9 +333,9 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
     -- else go with divide by 4 and decimal points
 
     local alignLines = 5
-    local offset = 10
+    local offset = 6
 
-    if (highestLevel < 60) then
+    if (highestLevel < 70) then
         local numOfTextObjs = 0
         local modNum = 0
 
@@ -363,18 +364,19 @@ function XPC:BuildYAxis(highestLevel, frameHeightInterval, totalXPOfHighest, XPO
 
         for i = x, numOfTextObjs do 
             local totalXPOfGraphIndex = 0
-            for x = 1, ((highestLevel - 1) * (i  / numOfTextObjs)) do 
-                totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[x]
+            local lineLevelPercentage = (i / numOfTextObjs)
+            for j = 2, (highestLevel * lineLevelPercentage) do 
+                totalXPOfGraphIndex = totalXPOfGraphIndex + XPC.db.realm.XPToLevelClassic[j -1]
             end
             local fstring = XPC_GUI.MainFrame:CreateFontString(nil, "OVERLAY", "GameToolTipText")
             fstring:SetFont("Fonts\\FRIZQT__.TTF", 20, "THINOUTLINE")
-            fstring:SetText(highestLevel * (i / numOfTextObjs))
+            fstring:SetText(highestLevel * lineLevelPercentage)
 
-            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * totalXPOfGraphIndex* (i / numOfTextObjs) -alignLines + offset)
+            fstring:SetPoint("BOTTOMLEFT", 5, frameHeightInterval * totalXPOfGraphIndex -alignLines + offset)
             local line = XPC_GUI.MainFrame:CreateLine()
             line:SetColorTexture(0.7,0.7,0.7,.1)
-            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * totalXPOfGraphIndex * (i / numOfTextObjs) +alignLines + offset)
-            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * totalXPOfGraphIndex * (i / numOfTextObjs) +alignLines + offset)
+            line:SetStartPoint("BOTTOMLEFT", 0, frameHeightInterval * totalXPOfGraphIndex +alignLines + offset)
+            line:SetEndPoint("BOTTOMRIGHT", 0, frameHeightInterval * totalXPOfGraphIndex +alignLines + offset)
         end
     end
 end

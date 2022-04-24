@@ -1,4 +1,4 @@
-## Interface: 42940
+## Interface: 20504
 ## Title: ZUI XP Chart
 ## Author: ZUI
 ## SavedVariables: ZUI_XPChartDB
