@@ -238,6 +238,36 @@ function  XPC:BuildSideFrameLayout()
 end
 
 function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
+    --find biggest DB
+    local longestDB = 1
+    local countLimit = 1
+    for i, v in pairs(XPC.db.realm.data) do 
+        for j, k in pairs(XPC.db.realm.showGraphLine) do 
+            if (i == j) then 
+                if(k[1] == true) then 
+                    if (longestDB < #v) then longestDB = #v end
+                end
+            end
+        end
+    end
+    print(longestDB)
+
+    -- set number of data point to skip (when data gets larger, skip some data)
+    if (longestDB > 100) then countLimit = 2 end
+    if (longestDB > 300) then countLimit = 3 end
+    if (longestDB > 500) then countLimit = 4 end
+    if (longestDB > 1000) then countLimit = 5 end
+    if (longestDB > 1500) then countLimit = 6 end
+    if (longestDB > 2000) then countLimit = 7 end
+    if (longestDB > 2500) then countLimit = 8 end
+    if (longestDB > 3000) then countLimit = 9 end
+    if (longestDB > 3500) then countLimit = 10 end
+    if (longestDB > 4000) then countLimit = 11 end
+    if (longestDB > 4500) then countLimit = 12 end
+    if (longestDB > 5000) then countLimit = 13 end
+    if (longestDB > 5500) then countLimit = 14 end
+    if (longestDB > 6000) then countLimit = 15 end
+
     for i, v in pairs(XPC.db.realm.data) do
         for j, k in pairs(XPC.db.realm.showGraphLine) do 
             if (i == j) then 
@@ -248,21 +278,28 @@ function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
                     else
                         color = {0,0,1,1}
                     end
-                    XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, color)
+                    XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, v, color, countLimit)
                 end
             end
         end
     end
 end
 
-function XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, DB, lineColor)
+function XPC:BuildFullLine(frameWidthInterval, frameHeightInterval, DB, lineColor, countLimit)
+    local count = 1
+
     for i, v in ipairs(DB) do
-        local StartTime = v[1]
-        local StartXP = v[4]
-        if (i ~= #DB) then 
-            local EndTime = DB[i +1][1]
-            local EndXP = DB[i +1][4]
-            XPC:BuildALine(frameWidthInterval, frameHeightInterval, StartTime, StartXP, EndTime, EndXP, lineColor)
+        if (count >= countLimit) then
+            local StartTime = v[1]
+            local StartXP = v[4]
+            if (i <= #DB - countLimit) then 
+                local EndTime = DB[i + countLimit][1]
+                local EndXP = DB[i + countLimit][4]
+                XPC:BuildALine(frameWidthInterval, frameHeightInterval, StartTime, StartXP, EndTime, EndXP, lineColor)
+            end
+            count = 1
+        else 
+            count = count + 1
         end
     end
 end
