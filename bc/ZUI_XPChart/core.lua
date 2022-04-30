@@ -250,7 +250,6 @@ function XPC:BuildAllLines(frameWidthInterval, frameHeightInterval)
             end
         end
     end
-    print(longestDB)
 
     -- set number of data point to skip (when data gets larger, skip some data)
     if (longestDB > 100) then countLimit = 2 end
