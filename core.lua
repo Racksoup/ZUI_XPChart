@@ -2,6 +2,9 @@ XPC = LibStub("AceAddon-3.0"):NewAddon("ZUI_XPChart")
 local L = LibStub("AceLocale-3.0"):GetLocale("ZUI_XPChartLocale")
 local XPC_GUI = LibStub("AceGUI-3.0")
 
+-- link for xp tables
+-- https://wow.tools/files/#search=gametables%2Fxp.txt&page=1&sort=0&desc=asc
+
 local defaults = {
     realm = {
         showGraphLine = {},
